@@ -1,0 +1,52 @@
+name: Publish web playtest
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Release tag containing idle-loot-quest-web.zip
+        required: true
+        type: string
+
+concurrency:
+  group: github-pages
+  cancel-in-progress: false
+
+permissions: {}
+
+jobs:
+  package:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Download and verify the Web export
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_TAG: ${{ inputs.tag || github.event.release.tag_name }}
+        run: |
+          gh release download --repo "$GITHUB_REPOSITORY" --pattern idle-loot-quest-web.zip --dir "$RUNNER_TEMP" -- "$RELEASE_TAG"
+          unzip -q "$RUNNER_TEMP/idle-loot-quest-web.zip" -d site
+          test -s site/index.html
+          test -s site/index.js
+          test -s site/index.wasm
+          test -s site/index.pck
+      - uses: actions/upload-pages-artifact@v4
+        with:
+          path: site
+
+  deploy:
+    needs: package
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.pages.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: pages
+        uses: actions/deploy-pages@v4
