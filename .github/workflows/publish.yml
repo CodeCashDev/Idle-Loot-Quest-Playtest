@@ -30,9 +30,11 @@ jobs:
           gh release download --repo "$GITHUB_REPOSITORY" --pattern idle-loot-quest-web.zip --dir "$RUNNER_TEMP" -- "$RELEASE_TAG"
           unzip -q "$RUNNER_TEMP/idle-loot-quest-web.zip" -d site
           test -s site/index.html
-          test -s site/index.js
-          test -s site/index.wasm
-          test -s site/index.pck
+          packs=(site/*.pck)
+          runtimes=(site/*.wasm)
+          test -s "${packs[0]}"
+          test -s "${runtimes[0]}"
+          test -s "${runtimes[0]%.wasm}.js"
       - uses: actions/upload-pages-artifact@v5
         with:
           path: site
