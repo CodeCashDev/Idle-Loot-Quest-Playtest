@@ -33,7 +33,7 @@ jobs:
           test -s site/index.js
           test -s site/index.wasm
           test -s site/index.pck
-      - uses: actions/upload-pages-artifact@v4
+      - uses: actions/upload-pages-artifact@v5
         with:
           path: site
 
@@ -49,4 +49,4 @@ jobs:
     steps:
       - name: Deploy to GitHub Pages
         id: pages
-        uses: actions/deploy-pages@v4
+        uses: actions/deploy-pages@v5
